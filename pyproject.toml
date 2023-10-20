@@ -9,6 +9,9 @@ repository = "https://github.com/Ddedalus/lucid-log"
 homepage = "https://github.com/Ddedalus/lucid-log"
 packages = [{include = "lucid_log"}]
 
+[tool.poetry.scripts]
+lucid = "lucid_log.cli:app"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 structlog = "^23.2.0"
