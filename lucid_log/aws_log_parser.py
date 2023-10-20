@@ -22,7 +22,6 @@ class LucidAWSLogs(AWSLogs):
 
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
-        do_wait = object()
 
         def generator():
             """Yield events into trying to deduplicate them using a lru queue.
