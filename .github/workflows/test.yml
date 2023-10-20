@@ -43,5 +43,5 @@ jobs:
       - name: pytest
         run: poetry run pytest --cov=lucid_log
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2
+      # - name: Coveralls
+      #   uses: coverallsapp/github-action@v2
