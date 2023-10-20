@@ -1,8 +1,10 @@
-from collections import deque
 import json
 import re
-from awslogs.core import AWSLogs
+from collections import deque
+
 from awslogs import exceptions
+from awslogs.core import AWSLogs
+
 
 class LucidAWSLogs(AWSLogs):
     """Lucid AWSLogs class that extends the AWSLogs class from awslogs. Returns the log generator instead of printing the logs."""
@@ -10,12 +12,16 @@ class LucidAWSLogs(AWSLogs):
     def list_logs(self):
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
-            streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
+            streams = list(
+                self._get_streams_from_pattern(
+                    self.log_group_name, self.log_stream_name
+                )
+            )
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
-                     self.log_stream_name,
-                     len(streams),
-                     self.FILTER_LOG_EVENTS_STREAMS_LIMIT
+                    self.log_stream_name,
+                    len(streams),
+                    self.FILTER_LOG_EVENTS_STREAMS_LIMIT,
                 )
             if len(streams) == 0:
                 raise exceptions.NoStreamsFilteredError(self.log_stream_name)
@@ -38,36 +44,40 @@ class LucidAWSLogs(AWSLogs):
                 order to not exhaust the memory.
             """
             interleaving_sanity = deque(maxlen=self.MAX_EVENTS_PER_CALL)
-            kwargs = {'logGroupName': self.log_group_name,
-                      'interleaved': True}
+            kwargs = {"logGroupName": self.log_group_name, "interleaved": True}
 
             if streams:
-                kwargs['logStreamNames'] = streams
+                kwargs["logStreamNames"] = streams
 
             if self.start:
-                kwargs['startTime'] = self.start
+                kwargs["startTime"] = self.start
 
             if self.end:
-                kwargs['endTime'] = self.end
+                kwargs["endTime"] = self.end
 
             if self.filter_pattern:
-                kwargs['filterPattern'] = self.filter_pattern
+                kwargs["filterPattern"] = self.filter_pattern
 
             while True:
                 response = self.client.filter_log_events(**kwargs)
 
-                for event in response.get('events', []):
-                    if event['eventId'] not in interleaving_sanity:
-                        interleaving_sanity.append(event['eventId'])
+                for event in response.get("events", []):
+                    if event["eventId"] not in interleaving_sanity:
+                        interleaving_sanity.append(event["eventId"])
                         yield json.dumps(event)
 
-                if 'nextToken' in response:
-                    kwargs['nextToken'] = response['nextToken']
+                if "nextToken" in response:
+                    kwargs["nextToken"] = response["nextToken"]
                 else:
                     yield None
 
         return generator()
 
+
 def get_parser(log_group_name, log_stream_pattern, region):
-    logs = LucidAWSLogs(log_group_name=log_group_name, log_stream_name=log_stream_pattern, aws_region=region)
+    logs = LucidAWSLogs(
+        log_group_name=log_group_name,
+        log_stream_name=log_stream_pattern,
+        aws_region=region,
+    )
     return logs.list_logs()

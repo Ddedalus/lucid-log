@@ -27,16 +27,19 @@ def show(log_file: Annotated[Optional[Path], typer.Argument()] = None):
         for line in file.readlines():
             display_line(line)
 
+
 @app.command()
 def aws(
     log_group_name: Annotated[str, typer.Argument()],
-    log_stream_pattern: Annotated[Optional[str], typer.Argument()] = "ALL", 
-    region: Optional[str] = typer.Option(None, "--region", "-r", envvar="AWS_REGION")):
+    log_stream_pattern: Annotated[Optional[str], typer.Argument()] = "ALL",
+    region: Optional[str] = typer.Option(None, "--region", "-r", envvar="AWS_REGION"),
+):
     typer.secho("Parsing logs from cloudwatch...", fg=typer.colors.GREEN)
     parser = get_parser(log_group_name, log_stream_pattern, region)
     for line in parser:
         if line:
             display_line(line)
+
 
 def display_line(line: str):
     try:
