@@ -1,7 +1,7 @@
 import asyncio
+import json
 import logging
 import sys
-import json
 import traceback
 
 from examples.shared import generate_logs
