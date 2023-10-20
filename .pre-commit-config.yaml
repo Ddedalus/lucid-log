@@ -1,0 +1,17 @@
+repos:
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        types: [python]
+        stages: ["commit", "post-merge"]
+
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+        stages: ["commit", "post-merge"]
+        pass_filenames: false
