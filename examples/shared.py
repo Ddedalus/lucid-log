@@ -5,7 +5,7 @@ def worker(x):
     return x["text"]
 
 
-async def generate_logs(logger):
+def generate_logs(logger):
     for i in range(10):
         x = dict()
         logger.warning("Generating log", extra={"iteration": i})

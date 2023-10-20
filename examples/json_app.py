@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import sys
@@ -38,9 +37,5 @@ handler.setFormatter(JsonFormatter())
 logger.handlers = [handler]
 
 
-async def main():
-    await generate_logs(logger)
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    generate_logs(logger)

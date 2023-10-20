@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import Annotated, Optional
 
+import structlog
 import typer
-from rich import print_json
 
 app = typer.Typer()
 
@@ -26,9 +26,13 @@ def show(log_file: Annotated[Optional[Path], typer.Argument()] = None):
             display_line(line)
 
 
+logger = structlog.getLogger()
+renderer = structlog.dev.ConsoleRenderer()
+
+
 def display_line(line: str):
     try:
         data = json.loads(line)
-        print_json(data=data)
+        print(renderer(logger, "wut", data))
     except json.JSONDecodeError:
         typer.secho(f"> {line}", fg=typer.colors.BRIGHT_BLACK)
