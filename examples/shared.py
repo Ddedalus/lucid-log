@@ -6,7 +6,7 @@ def worker(x):
 
 
 def generate_logs(logger):
-    for i in range(10):
+    for i in range(2):
         x = dict()
         logger.warning("Generating log", extra={"iteration": i})
         try:

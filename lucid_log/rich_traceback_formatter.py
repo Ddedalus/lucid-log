@@ -8,7 +8,7 @@ from typing import Any, Literal, Sequence, TextIO
 try:
     import rich
     from rich.console import Console
-    from rich.traceback import Stack, Trace, Traceback
+    from rich.traceback import Frame, Stack, Trace, Traceback
 except ImportError:
     rich = None  # type: ignore[assignment]
 
@@ -44,12 +44,16 @@ class RichJsonTracebackFormatter:
     locals_hide_sunder: bool = False
     suppress: Sequence[str | ModuleType] = ()
 
-    def __call__(self, sio: TextIO, exc_info: dict[str, Any]) -> None:
+    def __call__(
+        self, sio: TextIO, exc_info: tuple[str, str, list[dict[str, Any]]]
+    ) -> None:
         if self.width == -1:
             self.width, _ = shutil.get_terminal_size((80, 0))
 
         sio.write("\n")
-        trace = Trace(stacks=[])
+        t, v, frames = exc_info
+        frames = [Frame(**frame) for frame in frames]
+        trace = Trace(stacks=[Stack(exc_value=v, frames=frames, exc_type=t)])
         Console(file=sio, color_system=self.color_system).print(
             Traceback(
                 trace=trace,
