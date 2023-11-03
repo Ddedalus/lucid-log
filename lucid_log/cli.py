@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 import structlog
 import typer
+
+from lucid_log.rich_traceback_formatter import RichJsonTracebackFormatter
 
 app = typer.Typer()
 
@@ -27,12 +29,29 @@ def show(log_file: Annotated[Optional[Path], typer.Argument()] = None):
 
 
 logger = structlog.getLogger()
-renderer = structlog.dev.ConsoleRenderer()
+
+formatter = RichJsonTracebackFormatter()
+renderer = structlog.dev.ConsoleRenderer(
+    exception_formatter=formatter,
+)
+
+
+def transform_exception_format(data: dict[str, Any]):
+    exception = data.pop("exception", None)
+    if not exception:
+        return data
+    data["exc_info"] = (
+        exception[0]["exc_type"],
+        exception[0]["exc_value"],
+        exception[0]["frames"],
+    )
+    return data
 
 
 def display_line(line: str):
     try:
         data = json.loads(line)
+        data = transform_exception_format(data)
         print(renderer(logger, "wut", data))
     except json.JSONDecodeError:
         typer.secho(f"> {line}", fg=typer.colors.BRIGHT_BLACK)

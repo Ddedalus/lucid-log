@@ -1,0 +1,34 @@
+{
+  "extra": { "test": "test" },
+  "event": "Error",
+  "level": "error",
+  "exception": [
+    {
+      "exc_type": "KeyError",
+      "exc_value": "'text'",
+      "syntax_error": null,
+      "is_cause": false,
+      "frames": [
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 13,
+          "name": "generate_logs",
+          "line": "",
+          "locals": {
+            "logger": "'<BoundLoggerLazyProxy(logger=None, wrapper_class=None, processors=None, context_'+55",
+            "i": "9",
+            "x": "{}",
+            "e": "KeyError('text')"
+          }
+        },
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 5,
+          "name": "worker",
+          "line": "",
+          "locals": { "x": "{}" }
+        }
+      ]
+    }
+  ]
+}
