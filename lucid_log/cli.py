@@ -20,7 +20,10 @@ def show(log_file: Annotated[Optional[Path], typer.Argument()] = None):
     if log_file is None:
         typer.secho("Parsing logs from standard input...", fg=typer.colors.GREEN)
         while True:
-            line = input()
+            try:
+                line = input()
+            except EOFError:
+                return
             display_line(line)
 
     with log_file.open() as file:
@@ -32,7 +35,7 @@ logger = structlog.getLogger()
 
 formatter = RichJsonTracebackFormatter()
 renderer = structlog.dev.ConsoleRenderer(
-    exception_formatter=formatter,
+    exception_formatter=formatter,  # type: ignore
 )
 
 
