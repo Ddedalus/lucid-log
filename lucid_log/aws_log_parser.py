@@ -1,6 +1,6 @@
 import json
-from collections import deque
 import time
+from collections import deque
 
 from awslogs import exceptions
 from awslogs.core import AWSLogs
@@ -68,7 +68,7 @@ class LucidAWSLogs(AWSLogs):
                 else:
                     yield None
                     time.sleep(1)
-                    
+
         return generator()
 
     @classmethod
