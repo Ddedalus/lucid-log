@@ -6,3 +6,4 @@ coverage.lcov
 
 # Development
 .vscode
+*.env

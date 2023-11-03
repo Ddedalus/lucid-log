@@ -1,6 +1,6 @@
 import json
-import re
 from collections import deque
+import time
 
 from awslogs import exceptions
 from awslogs.core import AWSLogs
@@ -10,6 +10,7 @@ class LucidAWSLogs(AWSLogs):
     """Lucid AWSLogs class that extends the AWSLogs class from awslogs. Returns the log generator instead of printing the logs."""
 
     def list_logs(self):
+        """List logs from AWS CloudWatch. Return a generator that yields logs."""
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
             streams = list(
@@ -29,19 +30,15 @@ class LucidAWSLogs(AWSLogs):
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
 
-        def generator():
+        def generator() -> str | None:
             """Yield events into trying to deduplicate them using a lru queue.
-            AWS API stands for the interleaved parameter that:
-                interleaved (boolean) -- If provided, the API will make a best
-                effort to provide responses that contain events from multiple
-                log streams within the log group interleaved in a single
-                response. That makes some responses return some subsequent
-                response duplicate events. In a similar way when awslogs is
-                called with --watch option, we need to findout which events we
-                have alredy put in the queue in order to not do it several
-                times while waiting for new ones and reusing the same
-                next_token. The site of this queue is MAX_EVENTS_PER_CALL in
-                order to not exhaust the memory.
+            This is a workaround for the broken pagination.
+            The last MAX_EVENTS_PER_CALL events are kept in a queue and
+            checked against the current event id. If the event id is already
+            in the queue, the event is skipped.
+
+            If no new events are found, the generator yields None and sleeps
+            for 1 second before trying again.
             """
             interleaving_sanity = deque(maxlen=self.MAX_EVENTS_PER_CALL)
             kwargs = {"logGroupName": self.log_group_name, "interleaved": True}
@@ -70,14 +67,17 @@ class LucidAWSLogs(AWSLogs):
                     kwargs["nextToken"] = response["nextToken"]
                 else:
                     yield None
-
+                    time.sleep(1)
+                    
         return generator()
 
-
-def get_parser(log_group_name, log_stream_pattern, region):
-    logs = LucidAWSLogs(
-        log_group_name=log_group_name,
-        log_stream_name=log_stream_pattern,
-        aws_region=region,
-    )
-    return logs.list_logs()
+    @classmethod
+    def get_parser(cls, log_group_name, log_stream_pattern, region):
+        """Get a LucidAWSLogs instance and return the log generator."""
+        # TODO Add other parameters
+        logs = cls(
+            log_group_name=log_group_name,
+            log_stream_name=log_stream_pattern,
+            aws_region=region,
+        )
+        return logs.list_logs()
