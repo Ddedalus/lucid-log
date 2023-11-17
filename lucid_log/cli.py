@@ -1,9 +1,11 @@
 import json
+import sys
 from pathlib import Path
 from typing import Annotated, Any, Optional
 
 import loguru
 import typer
+from rich import print
 
 from lucid_log.aws_log_parser import LucidAWSLogs
 from lucid_log.rich_traceback_formatter import RichJsonTracebackFormatter
@@ -69,6 +71,11 @@ def display_line(line: str):
     try:
         data = json.loads(line)
         data = transform_exception_format(data)
-        loguru.logger.log(data.pop("level").upper(), data.pop("event"), **data)  # type: ignore
+        # TODO: We can print directly with Rich and not depend on loguru for this
+        loguru.logger.log(data.pop("level").upper(), data.pop("event"), **data)
+
+        if exc_info := data.pop("exc_info", None):
+            formatter(sys.stderr, exc_info)
+
     except json.JSONDecodeError:
         typer.secho(f"> {line}", fg=typer.colors.BRIGHT_BLACK)
