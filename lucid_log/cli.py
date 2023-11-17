@@ -42,7 +42,7 @@ def aws(
     typer.secho("Parsing logs from cloudwatch...", fg=typer.colors.GREEN)
     parser = LucidAWSLogs.get_parser(log_group_name, log_stream_pattern, region)
     # Get each log line from the generator, if no logs remain, break unless watching
-    for line in parser:
+    for line in parser:  # type: ignore
         if line:
             display_line(line)
         else:
