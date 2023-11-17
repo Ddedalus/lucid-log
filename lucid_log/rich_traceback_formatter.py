@@ -1,16 +1,15 @@
-from __future__ import annotations
+""" Formatter used to display the traceback in colorful text.
+Used when showing logs in the terminal.
 
+The RichJsonTracebackFormatter is an adaptation from structlog.dev:RichTracebackFormatter
+"""
 import shutil
 from dataclasses import dataclass
 from types import ModuleType
 from typing import Any, Literal, Sequence, TextIO
 
-try:
-    import rich
-    from rich.console import Console
-    from rich.traceback import Frame, Stack, Trace, Traceback
-except ImportError:
-    rich = None  # type: ignore[assignment]
+from rich.console import Console
+from rich.traceback import Frame, Stack, Trace, Traceback
 
 
 @dataclass
