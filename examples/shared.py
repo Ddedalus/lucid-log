@@ -24,9 +24,3 @@ def generate_logs(logger):
         nested_worker({})
     except Exception:
         logger.exception("Nested error", extra={"test": "test"})
-        import sys
-
-        e, v, trace = sys.exc_info()
-        assert v
-        assert v.__cause__
-        print(getattr(v, "__cause__").__traceback__)
