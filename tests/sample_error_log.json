@@ -1,0 +1,54 @@
+{
+  "extra": { "test": "test" },
+  "event": "Nested error",
+  "level": "error",
+  "exception": [
+    {
+      "exc_type": "ValueError",
+      "exc_value": "Outer exception",
+      "syntax_error": null,
+      "is_cause": false,
+      "frames": [
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 24,
+          "name": "generate_logs",
+          "line": "",
+          "locals": {
+            "logger": "'<BoundLoggerLazyProxy(logger=None, wrapper_class=None, processors=None, context_'+55",
+            "i": "1"
+          }
+        },
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 12,
+          "name": "nested_worker",
+          "line": "",
+          "locals": { "x": "{}" }
+        }
+      ]
+    },
+    {
+      "exc_type": "KeyError",
+      "exc_value": "'text'",
+      "syntax_error": null,
+      "is_cause": true,
+      "frames": [
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 10,
+          "name": "nested_worker",
+          "line": "",
+          "locals": { "x": "{}" }
+        },
+        {
+          "filename": "/home/hubert/personal/lucid-log/examples/shared.py",
+          "lineno": 5,
+          "name": "worker",
+          "line": "",
+          "locals": { "x": "{}" }
+        }
+      ]
+    }
+  ]
+}

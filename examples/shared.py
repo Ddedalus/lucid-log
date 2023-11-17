@@ -5,11 +5,22 @@ def worker(x):
     return x["text"]
 
 
-async def generate_logs(logger):
-    for i in range(10):
-        x = dict()
+def nested_worker(x):
+    try:
+        return worker(x)
+    except Exception as e:
+        raise ValueError("Outer exception") from e
+
+
+def generate_logs(logger):
+    for i in range(2):
         logger.warning("Generating log", extra={"iteration": i})
         try:
-            worker(x)
-        except Exception as e:
-            logger.error("Error", exc_info=e, extra={"test": "test"})
+            worker({})
+        except Exception:
+            logger.exception("Error", extra={"test": "test"})
+
+    try:
+        nested_worker({})
+    except Exception:
+        logger.exception("Nested error", extra={"test": "test"})
