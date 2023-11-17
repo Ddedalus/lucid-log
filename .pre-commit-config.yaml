@@ -15,3 +15,4 @@ repos:
         types: [python]
         stages: ["commit", "post-merge"]
         pass_filenames: false
+        args: ["."]
