@@ -2,6 +2,7 @@
 
 The exception processor with utility functions is ripped from structlog.
 
+TODO: use this in the example emitter apps.
 """
 
 import os
