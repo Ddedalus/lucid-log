@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Annotated, Any, Optional
 
-import structlog
+import loguru
 import typer
 
 from lucid_log.aws_log_parser import LucidAWSLogs
@@ -50,12 +50,7 @@ def aws(
                 break
 
 
-logger = structlog.getLogger()
-
 formatter = RichJsonTracebackFormatter()
-renderer = structlog.dev.ConsoleRenderer(
-    exception_formatter=formatter,  # type: ignore
-)
 
 
 def transform_exception_format(data: dict[str, Any]):
@@ -74,6 +69,6 @@ def display_line(line: str):
     try:
         data = json.loads(line)
         data = transform_exception_format(data)
-        print(renderer(logger, "wut", data))
+        loguru.logger.log(data.pop("level").upper(), data.pop("event"), **data)  # type: ignore
     except json.JSONDecodeError:
         typer.secho(f"> {line}", fg=typer.colors.BRIGHT_BLACK)
