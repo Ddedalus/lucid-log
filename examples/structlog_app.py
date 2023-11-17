@@ -13,3 +13,4 @@ logger = structlog.getLogger()
 
 if __name__ == "__main__":
     generate_logs(logger)
+    print("Unstructured nonsense!")

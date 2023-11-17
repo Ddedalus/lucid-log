@@ -78,4 +78,4 @@ def display_line(line: str):
             formatter(sys.stderr, exc_info)
 
     except json.JSONDecodeError:
-        typer.secho(f"> {line}", fg=typer.colors.BRIGHT_BLACK)
+        print(f"[red]>[/red] [bright_black]{line}[/bright_black]")
