@@ -1,0 +1,2 @@
+log_group_name: /aws/lambda/testLoggingPython
+duration: 3d

@@ -1,9 +1,36 @@
+import datetime
 import json
 import time
 from collections import deque
 
+import yaml
 from awslogs import exceptions
 from awslogs.core import AWSLogs
+from pydantic import BaseModel, Field, computed_field, field_validator
+
+from lucid_log.aws_utils import parse_delta
+
+
+class AWSLogConfig(BaseModel):
+    """AWS Log Config"""
+
+    log_group_name: str
+    log_stream_name: str
+    aws_region: str
+    filter_pattern: str | None = None
+    duration: str = Field(exclude=True, default="1h")
+
+    @computed_field
+    @property
+    def start(self) -> str:
+        """Start time"""
+        return (datetime.datetime.now() - parse_delta(self.duration)).isoformat()
+
+    @computed_field
+    @property
+    def end(self) -> str:
+        """End time"""
+        return datetime.datetime.now().isoformat()
 
 
 class LucidAWSLogs(AWSLogs):
@@ -61,7 +88,18 @@ class LucidAWSLogs(AWSLogs):
                 for event in response.get("events", []):
                     if event["eventId"] not in interleaving_sanity:
                         interleaving_sanity.append(event["eventId"])
-                        yield json.dumps(event)
+                        try:
+                            actual_event = json.loads(event["message"])
+                            message = actual_event.pop("message", event["message"])
+                            actual_event["event"] = message
+                            actual_event["timestamp"] = event["timestamp"]
+                            yield json.dumps(actual_event)
+                        except json.JSONDecodeError:
+                            actual_event = {}
+                            actual_event["level"] = "Info"
+                            actual_event["event"] = event["message"]
+                            actual_event["timestamp"] = event["timestamp"]
+                            yield json.dumps(actual_event)
 
                 if "nextToken" in response:
                     kwargs["nextToken"] = response["nextToken"]
@@ -72,12 +110,25 @@ class LucidAWSLogs(AWSLogs):
         return generator()
 
     @classmethod
-    def get_parser(cls, log_group_name, log_stream_pattern, region):
+    def get_parser(cls, **kwargs):
         """Get a LucidAWSLogs instance and return the log generator."""
         # TODO Add other parameters
-        logs = cls(
-            log_group_name=log_group_name,
-            log_stream_name=log_stream_pattern,
-            aws_region=region,
-        )
+        logs = cls(**kwargs)
         return logs.list_logs()
+
+    @classmethod
+    def parse_config_file(cls, config_file):
+        """Parse the config file and return the config."""
+        # TODO Add other parameters
+        if config_file:
+            try:
+                with open(config_file, "r") as file:
+                    config_data = yaml.safe_load(file)
+                    return config_data
+            except FileNotFoundError:
+                raise Exception(f"Error: File not found - {config_file}")
+            except yaml.YAMLError as e:
+                raise Exception(f"Error while parsing YAML file: {e}")
+            except Exception as e:
+                raise Exception(f"An unexpected error occurred: {e}")
+        return {}
